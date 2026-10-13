@@ -1,0 +1,3 @@
+import AuthPage from '../auth-page';
+export const dynamic = 'force-dynamic';
+export default function Page() { return <AuthPage mode="register" />; }

@@ -1,0 +1,11 @@
+minimumReleaseAge: 10080
+strictDepBuilds: true
+allowBuilds:
+  '@firebase/util': true
+  protobufjs: true
+  tesseract.js: false
+  unrs-resolver: true
+  sharp: true
+  esbuild: true
+  fsevents: true
+verifyDepsBeforeRun: false

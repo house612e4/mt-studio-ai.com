@@ -1,0 +1,13 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /users/{uid}/{fileId} {
+      function owner() { return request.auth != null && request.auth.uid == uid && request.auth.token.email_verified == true; }
+      allow read: if owner();
+      // Create-only prevents a client overwriting an accepted/signed file.
+      allow create: if owner() && fileId.matches('^[a-zA-Z0-9-]{20,80}$') && request.resource.size > 0 && request.resource.size <= 20 * 1024 * 1024;
+      allow update, delete: if false;
+    }
+    match /{allPaths=**} { allow read, write: if false; }
+  }
+}

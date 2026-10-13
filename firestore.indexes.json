@@ -1,0 +1,51 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "records",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "owner",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "created",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "files",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "owner",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "created",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "aiRequests",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "owner",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "created",
+          "order": "ASCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
