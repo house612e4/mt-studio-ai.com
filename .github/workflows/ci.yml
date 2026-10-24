@@ -17,6 +17,8 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test:security
       - run: pnpm test:design
+      - run: pnpm test:repair
+      - run: node --no-experimental-require-module -e "require('firebase-admin/auth')"
       - run: pnpm build
         env:
           NEXT_TELEMETRY_DISABLED: '1'
