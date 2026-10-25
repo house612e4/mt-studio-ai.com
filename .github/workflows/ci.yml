@@ -18,6 +18,10 @@ jobs:
       - run: pnpm test:security
       - run: pnpm test:design
       - run: pnpm test:repair
+      - run: pnpm test:admin
+      - run: pnpm test:payment
+      - run: pnpm test:site
+      - run: pnpm test:quality
       - run: node --no-experimental-require-module -e "require('firebase-admin/auth')"
       - run: pnpm build
         env:

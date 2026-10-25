@@ -1,0 +1,9 @@
+'use client';
+import {useEffect,useState} from 'react';
+import {readApiJson} from '@/lib/api-response';
+import {Button} from '@/components/ui/button';
+import {uuid} from '@/lib/payment-validation';
+export default function PaymentResult(){const[data,setData]=useState<Record<string,any>|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false),[id,setId]=useState('');
+ async function load(order:string){const r=await fetch('/api/payments/bkash/reconcile?order='+encodeURIComponent(order),{cache:'no-store'});setData(await readApiJson(r))}
+ useEffect(()=>{const order=new URL(window.location.href).searchParams.get('order')||'';setId(order);if(!uuid(order)){setError('পেমেন্টের পরিচয় সঠিক নয়।');return}void load(order).catch(e=>setError(e.message))},[]);
+ const paid=data?.status==='paid',sandbox=data?.status==='sandbox_completed';return <main className="identity-shell"><div className="identity-content"><h1>{paid?'পেমেন্ট সফল':sandbox?'পরীক্ষামূলক পেমেন্ট সফল':'পেমেন্টের অবস্থা'}</h1>{data&&<><p>৳{data.priceBDT} · {data.totalCredits} ক্রেডিট</p><p>{paid?'আপনার অ্যাকাউন্টে ক্রেডিট যোগ হয়েছে।':sandbox?'এটি sandbox পরীক্ষা। আসল টাকা বা ক্রেডিট যোগ হয়নি।':'পেমেন্ট এখনও নিশ্চিত হয়নি। টাকা কাটা গেলে নতুন পেমেন্ট করার আগে অবস্থা যাচাই করুন।'}</p>{data.trxId&&<p>লেনদেন: {data.trxId}</p>}</>}{error&&<p role="alert">{error}</p>}<div className="button-row"><Button disabled={busy||paid||sandbox||!uuid(id)} onClick={async()=>{setBusy(true);setError('');try{const r=await fetch('/api/payments/bkash/reconcile',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:id})});await readApiJson(r);await load(id)}catch(e){setError((e as Error).message)}finally{setBusy(false)}}}>{busy?'যাচাই হচ্ছে…':'আবার অবস্থা যাচাই করুন'}</Button><a href="/workspace">স্টুডিওতে ফিরুন</a></div></div></main>}

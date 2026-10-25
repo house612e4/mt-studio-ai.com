@@ -12,7 +12,11 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test:security": "node --experimental-strip-types --test tests/security.test.mjs",
     "test:design": "node --experimental-strip-types --test tests/design.test.mjs",
-    "test:repair": "node --experimental-strip-types --test tests/repair.test.mjs"
+    "test:repair": "node --experimental-strip-types --test tests/repair.test.mjs",
+    "test:admin": "node --experimental-strip-types --test tests/admin.test.mjs",
+    "test:payment": "node --experimental-strip-types --test tests/payment.test.mjs",
+    "test:site": "node --experimental-strip-types --test tests/site.test.mjs",
+    "test:quality": "node --experimental-strip-types --test tests/quality.test.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

@@ -4,7 +4,7 @@
 
 ## শুরু করুন
 
-1. প্রথমে `START-HERE-BN.md` পড়ুন। `DEPLOY-BN.md` অনুসারে Firebase এবং Netlify সেটআপ করুন।
+1. প্রথমে `PUT-VALUES-HERE-BN.md` ও `START-HERE-BN.md` পড়ুন। `DEPLOY-BN.md` অনুসারে Firebase এবং Netlify সেটআপ করুন।
 2. `.env.example` দেখে নিজের `.env.local` তৈরি করুন। কোনো আসল secret GitHub-এ দেবেন না।
 3. Node.js 22.13+ এবং `package.json`-এ নির্ধারিত pnpm ব্যবহার করুন।
 
@@ -68,3 +68,55 @@ Production Next.js build, TypeScript, সাতটি security guard test এব
 ## ১০টি ডিজাইন অপশন
 
 এআই টেমপ্লেট থেকে ল্যান্ডিং পেজ mockup, বিজ্ঞাপন, ব্র্যান্ড গাইডলাইন, লোগো, ক্যারোসেল, পোস্টার, ইনফোগ্রাফিক, প্রেজেন্টেশন স্লাইড, রিডিজাইন ও সোশ্যাল গ্রাফিক তৈরি করা যায়। `DESIGN-STUDIO-BN.md`-এ ব্যবহার, PNG/ZIP ফল, AI configuration ও খরচের বিবরণ আছে। `pnpm test:design` নতুন পরীক্ষা চালায়।
+
+
+## অ্যাডমিন প্রস্তুতি ও সংযোগ পরীক্ষা
+
+`ADMIN_UID`-এর অ্যাকাউন্ট দিয়ে লগইন করে Settings → স্টুডিও পরিচালনা খুলুন।
+
+- সংযোগ পরীক্ষা: Firebase environment-এর মান উপস্থিত আছে কি না, server Firestore read,
+  Storage bucket metadata এবং audit query পরীক্ষা হয়। গোপন মান ফেরত দেওয়া হয় না।
+- AI key উপস্থিত থাকা মানেই ব্যবহারযোগ্য ব্যালেন্স বা সফল generation নয়; paid request চালানো হয় না।
+- স্টুডিওর নাম, দেশের কোডসহ ফোন, সাপোর্ট ইমেইল, গ্রুপ, অ্যাপ ডাউনলোড ও নীতিমালার HTTPS
+  লিংক এখানে সংরক্ষণ করুন। খালি লিংকের বাটন দেখানো হয় না। এগুলো প্রকাশযোগ্য তথ্য।
+- গ্রাহকের ইমেইল খুঁজে বর্তমান ক্রেডিট দেখুন। নতুন **মোট** ক্রেডিট ও কারণ লিখে সমন্বয় করুন।
+  একই request ID দ্বিতীয়বার credit update করে না। ব্যালেন্স মাঝখানে বদলালে 409 দিয়ে থামে।
+- নতুন `adminAudit` collection server প্রথম সমন্বয়ের সময় তৈরি করে। নিজে বানাতে হবে না।
+  গ্রাহকের `records`-এও অপরিবর্তনযোগ্য credit-log রাখা হয়। Firestore client rules বন্ধই থাকবে।
+- পুরোনো `/api/workspace` credits action সরিয়ে audit-সহ `/api/admin` workflow ব্যবহার করা হয়।
+- `.env.example`-এর গোপন মান Netlify-তেই দিন। অ্যাডমিনের ব্র্যান্ড ফর্মে API key দেবেন না।
+
+পেমেন্ট provider ও merchant details না পাওয়া পর্যন্ত checkout সক্রিয় নয়। শুধু client success
+message দেখে credit যোগ করা যাবে না; provider webhook verification ও transaction
+idempotency যুক্ত করার পরে চালু করতে হবে। APK/সাপোর্ট গ্রুপের প্রকৃত লিংক না থাকলে খালি রাখুন।
+
+```sh
+pnpm test:admin
+```
+
+এই পরীক্ষা আসল admin route-কে আলাদা Auth/Firestore test adapter দিয়ে চালিয়ে access control,
+atomic audit writes, replay এবং stale balance rejection যাচাই করে; production credentials লাগে না।
+
+
+## bKash Checkout v2
+
+`BKASH-SETUP-BN.md` অনুসারে server-only credentials, encryption key ও sandbox সেটআপ করুন।
+Package selection, Create, signed callback, one-time Execute, Query fallback এবং atomic credit
+settlement বাস্তবায়িত। পেমেন্টের নীতি প্রকাশ ও credentials ছাড়া checkout বন্ধ থাকে।
+বোনাসসহ নির্ধারিত মোট ক্রেডিট একবার যোগ হয়; sandbox-এ real balance বাড়ে না।
+PGW approval/UAT/live transaction আলাদা করে সম্পন্ন করতে হবে; শুধু build সফল হলেই live নয়।
+
+
+## ব্র্যান্ড, নীতিমালা, অ্যাপ ও প্রতিযোগিতা
+
+অ্যাডমিন থেকে public logo upload, contact/social/support/app links এবং plain-text policy pages
+প্রকাশ করা যায়। `/download` বর্তমান APK link, version ও release notes দেখায়; APK build করা হয় না।
+Policies-এর internal pages প্রকাশ করলে checkout-এর policy links স্বয়ংক্রিয়ভাবে বসে।
+Contest-এ draft/publish/close, private owned-image submission, withdrawal, admin pagination ও
+winner publication আছে। পুরস্কার হাতে বিতরণ করবেন; winner publication স্বয়ংক্রিয় payout নয়।
+মূল contest rules প্রথম জমার পরে freeze থাকে। End date ও ownership server যাচাই করে।
+`PUT-VALUES-HERE-BN.md`-এ পরিবেশের মান, UI fields এবং live verification steps দেখুন।
+
+## Quality audit — 2026-10-25
+
+Direct `/admin` with server identity checks, workspace URL history, source image previews, idempotent AI attempts, visible record pagination, invoice currency validation, and structured CV/family/fuel forms are included. See `AUDIT-2026-10-25-BN.md` for findings and verification limits. Run `pnpm test:quality` in addition to the existing checks.

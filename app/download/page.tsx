@@ -1,0 +1,4 @@
+import {database} from '@/lib/firebase-admin';
+import {publicBrand} from '@/lib/studio-settings';
+export const dynamic='force-dynamic';
+export default async function Page(){const brand=publicBrand((await database().collection('settings').doc('brand').get()).data());return <main className="policy-page"><h1>{brand.name} অ্যাপ</h1>{brand.logoUrl&&<img src={brand.logoUrl} width={96} height={96} alt="স্টুডিওর লোগো"/>}{brand.appDownloadUrl?<><p>অ্যান্ড্রয়েড অ্যাপ{brand.appVersion?' · সংস্করণ '+brand.appVersion:''}</p>{brand.releaseNotes&&<article style={{whiteSpace:'pre-wrap'}}>{brand.releaseNotes}</article>}<p><a className="download-link" href={brand.appDownloadUrl} rel="noopener noreferrer">APK ডাউনলোড করুন</a></p></>:<p>অ্যাপের ডাউনলোড লিংক এখনও প্রকাশিত হয়নি।</p>}<a href="/workspace">ওয়েব স্টুডিও খুলুন</a></main>}
