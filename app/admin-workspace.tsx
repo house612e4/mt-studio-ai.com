@@ -25,6 +25,8 @@ const fields:{key:keyof BrandSettings;label:string;type?:string;max:number}[]=[
  {key:'threadsUrl',label:'Threads HTTPS লিংক',type:'url',max:2000},
  {key:'facebookUrl',label:'Facebook HTTPS লিংক',type:'url',max:2000},
  {key:'youtubeUrl',label:'YouTube HTTPS লিংক',type:'url',max:2000}
+ ,{key:'googleReviewUrl',label:'Google Business-এর “Get more reviews” লিংক',type:'url',max:2000}
+ ,{key:'googlePlaceId',label:'Google Business Place ID',max:220}
 ];
 const states:Record<string,string>={passed:'পরীক্ষায় সফল',configured:'মান দেওয়া আছে',missing:'মান দেওয়া বাকি',error:'পরীক্ষা ব্যর্থ',pending:'সংযোগ বাকি'};
 export default function AdminWorkspace({data,refresh,contest}:{data:Workspace;refresh:()=>Promise<void>;contest:()=>void}){

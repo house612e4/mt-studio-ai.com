@@ -23,6 +23,8 @@ export async function GET(req:Request){try{
  const variables=['NEXT_PUBLIC_FIREBASE_API_KEY','NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN','NEXT_PUBLIC_FIREBASE_PROJECT_ID','NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET','NEXT_PUBLIC_FIREBASE_APP_ID','FIREBASE_SERVICE_ACCOUNT_JSON','APP_ORIGIN'];
  for(const name of variables)checks.push({id:name,name,state:process.env[name]?'configured':'missing',detail:process.env[name]?'মান দেওয়া আছে; গোপন মান এখানে দেখানো হয় না।':'Netlify Environment variables-এ মান দিন।'});
  checks.push({id:'ai',name:'AI API configuration',state:process.env.OPENAI_API_KEY?'configured':'missing',detail:'Key উপস্থিত থাকা সফল AI generation বা ব্যালেন্স যাচাইয়ের প্রমাণ নয়।'});
+ checks.push({id:'analytics',name:'Google Analytics visitor tracking',state:/^G-[A-Z0-9]+$/i.test(process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID||'')?'configured':'missing',detail:process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?'GA4 Measurement ID দেওয়া আছে; রিপোর্ট Google Analytics-এ দেখা যাবে।':'ভিজিটর ও page view গুনতে NEXT_PUBLIC_GA_MEASUREMENT_ID দিন।'});
+ checks.push({id:'google-reviews',name:'Google Business reviews',state:process.env.GOOGLE_PLACES_API_KEY?'configured':'missing',detail:process.env.GOOGLE_PLACES_API_KEY?'Places API key দেওয়া আছে; Place ID ও review link স্টুডিও সেটিংসে দিন।':'লাইভ Google rating ও review দেখাতে GOOGLE_PLACES_API_KEY দিন।'});
  checks.push({id:'payment',name:'অনলাইন পেমেন্ট',state:bkashConfig()?'configured':'missing',detail:bkashConfig()?'bKash v2 '+bkashConfig()!.environment+' configuration দেওয়া আছে; সফল live payment এখনও আলাদা পরীক্ষা করতে হবে।':'bKash v2 credentials, API URL, encryption key ও enable flag প্রয়োজন।'});
  const [firestore,storage,audit]=await Promise.allSettled([
   db.collection('settings').doc('brand').get(),
