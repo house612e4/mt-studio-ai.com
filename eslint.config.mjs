@@ -12,7 +12,18 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "public/**",
+    "vendor/**",
   ]),
+  {
+    files: ["app/**/*.{ts,tsx}"],
+    rules: {
+      // Browser blob URLs and short-lived signed previews cannot use the image optimizer.
+      "@next/next/no-img-element": "off",
+      // These boundaries intentionally reload the document to refresh server auth cookies.
+      "@next/next/no-location-assign-relative-destination": "off",
+    },
+  },
   {
     files: ["components/ui/**/*.{ts,tsx}", "hooks/use-mobile.ts"],
     rules: {

@@ -1,22 +1,32 @@
 import {createHash} from 'node:crypto';
-import {account,database,checkWriteRequest,failure,HttpError} from '@/lib/server';
+import {account,database,checkWriteRequest,enforceRateLimit,failure,HttpError,requireRecentAdmin} from '@/lib/server';
 import {validatePolicies,policyKinds} from '@/lib/site-content';
 import {creditPackage} from '@/lib/credit-packages';
 import {manualInput,manualWallets} from '@/lib/manual-payments';
 export const runtime='nodejs';
 export const dynamic='force-dynamic';
 const json=(data:unknown)=>Response.json(data,{headers:{'Cache-Control':'private, no-store'}});
-export async function GET(req:Request){try{const a=await account(),db=database(),all=!!req&&new URL(req.url).searchParams.get('scope')==='all';if(all&&!a.admin)throw new HttpError(403,'অ্যাডমিন অনুমতি প্রয়োজন।');const q=all?db.collection('manualPayments').orderBy('created','desc').limit(100):db.collection('manualPayments').where('owner','==',a.userId).limit(100);const rows=(await q.get()).docs.map(d=>({id:d.id,...d.data()}));return json({orders:rows,balance:Number((await db.collection('users').doc(a.userId).get()).data()?.credits)||0})}catch(e){return failure(e)}}
+export async function GET(req:Request){try{
+ const a=await account(),db=database(),params=new URL(req?.url||'http://localhost/api/payments/manual').searchParams,all=params.get('scope')==='all',status=params.get('status')||'all',after=params.get('after');
+ if(all&&!a.admin)throw new HttpError(403,'অ্যাডমিন অনুমতি প্রয়োজন।');
+ if(!['all','pending','approved','rejected'].includes(status))throw new HttpError(400,'পেমেন্টের অবস্থা সঠিক নয়।');
+ if(after&&(!/^[0-9a-f-]{36}$/i.test(after)))throw new HttpError(400,'পাতার পরিচয় সঠিক নয়।');
+ const limit=Math.min(50,Math.max(1,Math.floor(Number(params.get('limit'))||30)));
+ let q:FirebaseFirestore.Query=db.collection('manualPayments');if(!all)q=q.where('owner','==',a.userId);if(status!=='all')q=q.where('status','==',status);q=q.orderBy('created','desc').orderBy('__name__','desc');
+ if(after){const cursor=await db.collection('manualPayments').doc(after).get();if(!cursor.exists||!all&&cursor.data()?.owner!==a.userId||status!=='all'&&cursor.data()?.status!==status)throw new HttpError(404,'পাতার তথ্য পাওয়া যায়নি।');q=q.startAfter(cursor)}
+ const result=await q.limit(limit+1).get(),docs=result.docs.slice(0,limit);return json({orders:docs.map(d=>({id:d.id,...d.data()})),next:result.size>limit?docs.at(-1)?.id:null,balance:Number((await db.collection('users').doc(a.userId).get()).data()?.credits)||0})
+}catch(e){return failure(e)}}
 export async function POST(req:Request){try{
  checkWriteRequest(req);const a=await account(),b=await req.json(),db=database();
- if(b.action==='approve'||b.action==='reject'){
-  if(!a.admin)throw new HttpError(403,'শুধু অ্যাডমিন পেমেন্ট যাচাই করতে পারবেন।');
+ if(b.action==='approve'||b.action==='reject'||b.action==='reopen'){
+  requireRecentAdmin(a);await enforceRateLimit('payment-review-'+a.userId,30,60000);
   if(typeof b.id!=='string'||! /^[0-9a-f-]{36}$/i.test(b.id))throw new HttpError(400,'সঠিক অনুরোধ বেছে নিন।');
   const reason=typeof b.reason==='string'?b.reason.trim().slice(0,300):'';
   if(reason.length<5)throw new HttpError(400,'যাচাইয়ের কারণ অন্তত ৫ অক্ষরে লিখুন।');
   const ref=db.collection('manualPayments').doc(b.id);
   await db.runTransaction(async t=>{
    const o=(await t.get(ref)).data();if(!o)throw new HttpError(404,'অনুরোধ পাওয়া যায়নি।');
+   if(b.action==='reopen'){if(o.status==='pending'&&o.reopened)return;if(o.status!=='rejected')throw new HttpError(409,'শুধু বাতিল অনুরোধ আবার খোলা যাবে।');t.update(ref,{status:'pending',reason,reopened:true,reopenedBy:a.userId,reopenedAt:new Date().toISOString()});return}
    const status=b.action==='approve'?'approved':'rejected';if(o.status===status)return;if(o.status!=='pending')throw new HttpError(409,'অনুরোধটির সিদ্ধান্ত আগেই হয়েছে।');
    const now=new Date().toISOString();
    if(status==='approved'){

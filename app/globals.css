@@ -386,3 +386,15 @@ html[data-studio-theme=dark] .google-review-section{background:linear-gradient(1
 
 .launch-menu{width:40px;height:40px;display:grid;place-items:center;border:1px solid #d9e2ee;border-radius:11px;background:#fff;color:var(--mt-navy)}.launch-menu:hover{background:#eef5ff}.launch-menu:focus-visible{outline:2px solid var(--mt-blue);outline-offset:2px}.account-menu-user.guest a{color:var(--mt-blue)}
 html[data-studio-theme=dark] .launch-menu{background:#1b2a47;color:#e8effc;border-color:#355078}
+/* Readable controls, keyboard focus and mobile-safe layouts. */
+:root{scroll-padding-top:84px}
+:is(button,a,input,select,textarea):focus-visible{outline:3px solid #2563eb;outline-offset:3px}
+.auth-eye{min-width:44px;min-height:44px}.auth-text-link,.auth-check-label{min-height:44px;display:inline-flex;align-items:center}.auth-input,.auth-country{font-size:16px!important}.auth-prefix{pointer-events:none}.auth-message{overflow-wrap:anywhere}
+.auth-divider,.google-review-note,.google-review-card header small{color:#5d687c}
+.launch-search,.launch-menu{width:44px;height:44px;min-width:44px;min-height:44px}.launch-bottom-nav>button{min-height:48px;color:#62697a}.launch-bottom-nav button:last-child span{line-height:1.35}.account-menu-row{min-height:48px}
+.google-review-attributions{list-style:none;padding:0;margin:8px 0;color:#5d687c;font-size:.8rem}.google-review-attributions a{color:inherit;text-decoration:underline}.google-review-original{display:inline-flex;align-items:center;min-height:44px;margin-top:8px;font-size:.82rem;font-weight:600;color:#1d4ed8}
+.google-review-card p{overflow-wrap:anywhere}.google-review-card header strong{overflow-wrap:anywhere}.google-review-stars{color:#976000}
+@media(max-width:720px){[data-slot=dialog-content],[data-slot=alert-dialog-content]{max-height:calc(100dvh - 32px);overflow:auto}.auth-shell .auth-input{min-height:48px}.auth-form{min-width:0}.auth-container{width:100%}.admin-workspace{overflow-wrap:anywhere}.admin-workspace :is(input,textarea,select){font-size:16px}.admin-workspace [data-slot=button]{min-height:44px}.admin-workspace .button-row{flex-wrap:wrap}.admin-workspace .button-row>*{max-width:100%}.admin-workspace :is(.admin-check,.admin-section-heading){flex-wrap:wrap;gap:12px}.admin-workspace .admin-check>div{min-width:0}.admin-workspace .two-columns{grid-template-columns:minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+html[data-studio-theme=dark] :is(.auth-divider,.google-review-note,.google-review-card header small,.google-review-attributions){color:#b6c3d8}html[data-studio-theme=dark] .google-review-original{color:#91b4ff}html[data-studio-theme=dark] .google-review-stars{color:#ffc86b}
+.auth-shell .auth-eye,.auth-shell .auth-field-icon,.auth-shell .auth-prefix{color:#616879}.auth-shell .auth-input::placeholder{color:#687183}.auth-register #phone{padding-left:78px}.auth-form [data-slot=checkbox]{min-width:20px;min-height:20px}.auth-form [data-slot=checkbox]:focus-visible{outline:3px solid #2563eb;outline-offset:3px}

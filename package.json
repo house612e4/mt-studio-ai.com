@@ -16,7 +16,11 @@
     "test:admin": "node --experimental-strip-types --test tests/admin.test.mjs",
     "test:site": "node --experimental-strip-types --test tests/site.test.mjs",
     "test:quality": "node --experimental-strip-types --test tests/quality.test.mjs",
-    "test:commerce": "node --experimental-strip-types --test tests/commerce.test.mjs tests/manual-payment.test.mjs"
+    "test:commerce": "node --experimental-strip-types --test tests/commerce.test.mjs tests/manual-payment.test.mjs",
+    "lint": "eslint app lib components hooks tests netlify --max-warnings=0",
+    "test:storage": "node --experimental-strip-types --test tests/storage.test.mjs",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
+    "test:reviews": "node --experimental-strip-types --test tests/google-places.test.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

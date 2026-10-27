@@ -4,7 +4,7 @@ import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Textarea} from '@/components/ui/textarea';
 import {printContent,escapeHtml,download} from '@/lib/processing';
-import {write,type RecordItem} from './studio';
+import {write} from '@/lib/workspace-client';
 type Field={key:string;label:string;multiline?:boolean;required?:boolean;type?:string};
 const configurations:Record<string,{title:string;fields:Field[]}>= {
  cv:{title:'জীবনবৃত্তান্ত',fields:[{key:'name',label:'পূর্ণ নাম',required:true},{key:'headline',label:'পেশা / যে পদের জন্য আবেদন'},{key:'phone',label:'ফোন নম্বর',type:'tel'},{key:'email',label:'ইমেইল',type:'email'},{key:'address',label:'ঠিকানা'},{key:'summary',label:'পেশাগত পরিচিতি',multiline:true},{key:'experience',label:'কাজের অভিজ্ঞতা — পদ, প্রতিষ্ঠান, সময় ও দায়িত্ব',multiline:true},{key:'education',label:'শিক্ষা — ডিগ্রি, প্রতিষ্ঠান ও বছর',multiline:true},{key:'skills',label:'দক্ষতা ও ভাষা',multiline:true},{key:'projects',label:'প্রকল্প / প্রশিক্ষণ / অর্জন',multiline:true}]},

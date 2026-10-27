@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import ts from 'typescript';
+import {adminSecurityIssue} from '../lib/admin-security.ts';
 import {creditAdjustment} from '../lib/admin-input.ts';
 import {validateBrand,publicBrand,publicHttpsUrl} from '../lib/studio-settings.ts';
 
@@ -31,19 +32,20 @@ const db={collection:c=>({doc:id=>ref(c,id)}),runTransaction:async callback=>{
 globalThis.__mtAdminTest={
  account:async()=>{if(!actor)throw new HttpError(401,'login');return actor},database:()=>db,bucket:()=>({getMetadata:async()=>[]}),
  failure:e=>Response.json({error:e.message},{status:e.status||500}),HttpError,
+ requireRecentAdmin:a=>{const issue=adminSecurityIssue(a,false);if(issue)throw new HttpError(issue==='not-admin'?403:401,issue)},enforceRateLimit:async()=>{},
  checkWriteRequest:req=>{if(req.headers.get('origin')!=='https://studio.example')throw new HttpError(403,'origin')},
  adminAuth:()=>({getUser:async uid=>{authLookups++;return {uid,email:'customer@example.com',disabled:false,emailVerified:true}}})
 };
 const source=await readFile(new URL('../app/api/admin/route.ts',import.meta.url),'utf8');
-const imports=source.replace(/import \{([^}]+)\} from '@\/lib\/server';/, 'const {$1}=globalThis.__mtAdminTest;').replace(/import \{adminAuth\} from '@\/lib\/firebase-admin';/, 'const {adminAuth}=globalThis.__mtAdminTest;').replace("'@/lib/admin-input'",JSON.stringify(new URL('../lib/admin-input.ts',import.meta.url).href));
+const imports=source.replace("import {fetchGooglePlace,PlacesConnectionError} from '@/lib/google-places';",'const fetchGooglePlace=async()=>({});class PlacesConnectionError extends Error{}').replace(/import \{([^}]+)\} from '@\/lib\/server';/, 'const {$1}=globalThis.__mtAdminTest;').replace(/import \{adminAuth\} from '@\/lib\/firebase-admin';/, 'const {adminAuth}=globalThis.__mtAdminTest;').replace("'@/lib/admin-input'",JSON.stringify(new URL('../lib/admin-input.ts',import.meta.url).href));
 const js=ts.transpileModule(imports,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
 const route=await import('data:text/javascript;base64,'+Buffer.from(js).toString('base64'));
-function reset(){actor={admin:true,userId:'owner'};records=new Map([['users/customer-123',{credits:10}]]);authLookups=0}
+function reset(){actor={admin:true,userId:'owner',authTime:Date.now()/1000};records=new Map([['users/customer-123',{credits:10}]]);authLookups=0}
 function request(body=valid,origin='https://studio.example'){return new Request('https://studio.example/api/admin',{method:'POST',headers:{origin,'content-type':'application/json'},body:JSON.stringify(body)})}
 test('admin route rejects missing login, non-admin users and hostile write origins before customer access',async()=>{
  reset();actor=null;assert.equal((await route.POST(request())).status,401);
  actor={admin:false,userId:'other'};assert.equal((await route.POST(request())).status,403);assert.equal((await route.GET(new Request('https://studio.example/api/admin'))).status,403);
- actor={admin:true,userId:'owner'};assert.equal((await route.POST(request(valid,'https://evil.example'))).status,403);assert.equal(authLookups,0);
+ actor={admin:true,userId:'owner',authTime:Date.now()/1000};assert.equal((await route.POST(request(valid,'https://evil.example'))).status,403);assert.equal(authLookups,0);
 });
 test('credit update and both audit entries commit together; replay does not reapply after later spending',async()=>{
  reset();const first=await route.POST(request());assert.equal(first.status,200);assert.equal(records.get('users/customer-123').credits,25);assert.equal(records.size,3);
@@ -71,3 +73,5 @@ test('social links preserve supplied destinations, inherit into old settings and
  assert.equal(b.youtubeUrl,'https://www.youtube.com/@mt_studio_ai46');
  for(const k of ['instagramUrl','threadsUrl','facebookUrl','youtubeUrl']){assert.equal(validateBrand({...b,[k]:'javascript:alert(1)'}),null);assert.equal(validateBrand({...b,[k]:''})[k],'')}
 });
+
+test('stale administrator authentication cannot mutate customer credits',async()=>{reset();actor.authTime=Date.now()/1000-3600;const r=await route.POST(request());assert.equal(r.status,401);assert.equal(authLookups,0);assert.equal(records.get('users/customer-123').credits,10)});

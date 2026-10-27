@@ -13,7 +13,7 @@ import {NativeSelect,NativeSelectOption} from '@/components/ui/native-select';
 import {Button} from '@/components/ui/button';
 import {profileProgress} from '@/lib/profile-progress';
 import {emptyProfile,type StudioProfile} from '@/lib/profile';
-import {write,type Workspace} from './studio';
+import {write} from '@/lib/workspace-client';import type {Workspace} from './studio';
 const countries=[['US','🇺🇸 যুক্তরাষ্ট্র'],['BD','🇧🇩 বাংলাদেশ'],['IN','🇮🇳 ভারত'],['GB','🇬🇧 যুক্তরাজ্য'],['SA','🇸🇦 সৌদি আরব'],['AE','🇦🇪 সংযুক্ত আরব আমিরাত']];
 type Field={key:keyof StudioProfile;label:string;type?:string};
 const personal:Field[]=[{key:'fullName',label:'পূর্ণ নাম'},{key:'phone',label:'ফোন নম্বর',type:'tel'},{key:'country',label:'দেশ'},{key:'profession',label:'পেশা / পদবি'},{key:'gender',label:'লিঙ্গ'},{key:'birthDate',label:'জন্মতারিখ',type:'date'},{key:'address',label:'ঠিকানা'},{key:'district',label:'জেলা'},{key:'area',label:'থানা / উপজেলা'},{key:'postcode',label:'পোস্টকোড'},{key:'about',label:'নিজের সম্পর্কে',type:'textarea'}];

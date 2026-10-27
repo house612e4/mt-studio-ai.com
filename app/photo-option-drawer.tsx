@@ -1,6 +1,6 @@
 'use client';
 import ClothingPreview from './clothing-preview';
-import {Check,X,Contact,UsersRound,Square,Plane,Shirt,Ban,PersonStanding,Sparkles,Sun,Lightbulb,ScanFace,Droplets,Smile,ScanLine,UserRound,PenLine,Heart,Palette} from 'lucide-react';
+import {Check,X,Contact,UsersRound,Square,Plane,Ban,Sparkles,Sun,Lightbulb,ScanFace,Droplets,Smile,ScanLine,UserRound,PenLine,Heart,Palette} from 'lucide-react';
 import {Drawer,DrawerContent,DrawerHeader,DrawerTitle,DrawerDescription,DrawerClose} from '@/components/ui/drawer';
 import {Input} from '@/components/ui/input';import {Textarea} from '@/components/ui/textarea';
 import {clothes,backgrounds,guides,visaSizes} from '@/lib/photo-presets';

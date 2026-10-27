@@ -20,6 +20,8 @@ export default function PhotoEntryWorkspace({data,refresh,openGallery,initialTab
  const [files,setFiles]=useState<File[]>([]),[active,setActive]=useState(0),[tab,setTab]=useState(initialTab),[error,setError]=useState(''),[dual,setDual]=useState(false),[pair,setPair]=useState<(File|null)[]>([null,null]),[panel,setPanel]=useState(''),[kind,setKind]=useState('passport'),[size,setSize]=useState('35×45 mm'),[clothing,setClothing]=useState('original'),[background,setBackground]=useState('#ffffff'),[choices,setChoices]=useState<string[]>([]),[custom,setCustom]=useState('');const upload=useRef<HTMLInputElement>(null);
  const [edited,setEdited]=useState<(Blob|null)[]>([null,null]),[sheetBusy,setSheetBusy]=useState(false);
  const [preferencesReady,setPreferencesReady]=useState(false);
+// Browser-only saved preferences are hydrated once before persistence begins.
+// eslint-disable-next-line react-hooks/set-state-in-effect
  useEffect(()=>{try{const p=readPhotoPreferences(JSON.parse(localStorage.getItem('mt-photo-preferences')||'null'));setKind(p.kind);setSize(p.size);setClothing(p.clothing);setBackground(p.background);setChoices(p.choices);setCustom(p.custom)}catch{}setPreferencesReady(true)},[]);
  useEffect(()=>{if(preferencesReady)try{localStorage.setItem('mt-photo-preferences',JSON.stringify({kind,size,clothing,background,choices,custom}))}catch{}},[preferencesReady,kind,size,clothing,background,choices,custom]);
  const choose=(incoming:File[])=>{if(incoming.length!==1){setError('একটি ছবি দিন। দুটি ছবির জন্য নিচের আলাদা অপশনটি ব্যবহার করুন।');return;}const issue=photoInputError(incoming[0]);if(issue){setError(issue);return;}setFiles(incoming);setEdited([null,null]);setActive(0);setTab(initialTab);setError('');};

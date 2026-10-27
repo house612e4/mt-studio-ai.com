@@ -2,7 +2,7 @@
 import {readApiJson} from '@/lib/api-response';
 import {useState,useRef} from 'react';import {Sparkles,ArrowLeft,Copy,Download,Save,ImagePlus,Loader2,Check,Layers,Palette,LayoutTemplate,PenTool} from 'lucide-react';
 import {Button} from '@/components/ui/button';import {Input} from '@/components/ui/input';import {Textarea} from '@/components/ui/textarea';import {toast} from 'sonner';
-import {designTemplates,initialDesignBrief,validateDesignBrief,designPrompt,type DesignBrief} from '@/lib/design-templates';import {uploadFile} from '@/lib/file-upload';import {download} from '@/lib/processing';import {write,type Workspace} from './studio';
+import {designTemplates,initialDesignBrief,validateDesignBrief,designPrompt,type DesignBrief} from '@/lib/design-templates';import {uploadFile} from '@/lib/file-upload';import {download} from '@/lib/processing';import {write} from '@/lib/workspace-client';import type {Workspace} from './studio';
 export default function DesignStudio({data,refresh,photoTemplates,onRequireAuth}:{data:Workspace;refresh:()=>Promise<void>;photoTemplates:()=>void;onRequireAuth?:()=>void}){
  const attempts=useRef(new Map<string,string>());
  const [brief,setBrief]=useState<DesignBrief|null>(null),[file,setFile]=useState<File|null>(null),[busy,setBusy]=useState(false),[saveBusy,setSaveBusy]=useState(false),[results,setResults]=useState<{id:string;slide:number}[]>([]),[error,setError]=useState(''),[progress,setProgress]=useState(0),[runSignature,setRunSignature]=useState('');

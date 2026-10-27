@@ -25,14 +25,15 @@ export function remainingTime(end:string,now=Date.now()){const s=Math.max(0,Math
 export type ScoreEntry={id:string;owner:string;publicName:string;points:number;joined:string};
 export type ScoreEvent={owner?:string;entryId?:string;kind?:string;created:string;data?:string;status?:string;priceBDT?:number};
 export function automaticScores(c:Pick<Competition,'startsAt'|'endsAt'|'tasks'>,entries:ScoreEntry[],records:ScoreEvent[],payments:ScoreEvent[],referrals:ScoreEvent[]){
+ const byOwner=new Map(entries.map(e=>[e.owner,e])),byId=new Map(entries.map(e=>[e.id,e]));
+ const used=new Map<string,number>(),paid=new Map<string,number>(),invited=new Map<string,number>();
+ const eligible=(v:ScoreEvent,e:ScoreEntry)=>{const time=Date.parse(v.created);return time>=Math.max(Date.parse(c.startsAt),Date.parse(e.joined))&&time<=Date.parse(c.endsAt)};
+ for(const v of records){const e=v.owner?byOwner.get(v.owner):undefined;if(!e||v.kind!=='credit-use'||!eligible(v,e))continue;try{const amount=JSON.parse(v.data||'{}').amount;if(Number.isSafeInteger(amount)&&amount>0)used.set(e.id,(used.get(e.id)||0)+amount)}catch{}}
+ for(const v of payments){const e=v.owner?byOwner.get(v.owner):undefined;if(e&&v.status==='approved'&&eligible(v,e)&&Number.isFinite(v.priceBDT)&&Number(v.priceBDT)>0)paid.set(e.id,(paid.get(e.id)||0)+Number(v.priceBDT))}
+ for(const v of referrals){const e=v.entryId?byId.get(v.entryId):undefined;if(e&&eligible(v,e))invited.set(e.id,(invited.get(e.id)||0)+1)}
  return entries.map(e=>{
-  const after=Math.max(Date.parse(c.startsAt),Date.parse(e.joined)),end=Date.parse(c.endsAt);
-  const eligible=(v:ScoreEvent)=>Date.parse(v.created)>=after&&Date.parse(v.created)<=end;
-  const used=records.filter(v=>v.owner===e.owner&&v.kind==='credit-use'&&eligible(v)).reduce((n,v)=>{try{const amount=JSON.parse(v.data||'{}').amount;return n+(Number.isSafeInteger(amount)&&amount>0?amount:0)}catch{return n}},0);
-  const paid=payments.filter(v=>v.owner===e.owner&&v.status==='approved'&&eligible(v)).reduce((n,v)=>n+(Number.isFinite(v.priceBDT)&&v.priceBDT!>0?v.priceBDT!:0),0);
-  const invited=referrals.filter(v=>v.entryId===e.id&&eligible(v)).length;
   const automatic:Record<string,number>={};
-  for(const task of c.tasks){const units=task.kind==='credit-spend'?used:task.kind==='purchase-total'?paid:task.kind==='referral'?invited:0;if(['credit-spend','purchase-total','referral'].includes(task.kind))automatic[task.id]=Math.floor((units*task.points)+1e-7)}
+  for(const task of c.tasks){const units=task.kind==='credit-spend'?(used.get(e.id)||0):task.kind==='purchase-total'?(paid.get(e.id)||0):task.kind==='referral'?(invited.get(e.id)||0):0;if(['credit-spend','purchase-total','referral'].includes(task.kind))automatic[task.id]=Math.floor((units*task.points)+1e-7)}
   return {...e,points:e.points+Object.values(automatic).reduce((a,b)=>a+b,0),automatic};
  });
 }

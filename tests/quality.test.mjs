@@ -58,13 +58,13 @@ test('invoice math uses minor currency units and exposes overpayment as advance 
 import React from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 globalThis.__qualityReact=React;
-let pageActor,renderedStudio;
-globalThis.__pageAuth={requireUser:async next=>{if(!pageActor)throw new Error('LOGIN:'+next);return pageActor},isStudioAdmin,Studio:props=>{renderedStudio=props;return React.createElement('main',null,'ADMIN STUDIO')}};
-const pageSource=(await readFile(new URL('../app/admin/page.tsx',import.meta.url),'utf8')).replace("import Studio from '../studio';",'const {Studio}=globalThis.__pageAuth;').replace("import {requireUser} from '@/lib/firebase-session';",'const {requireUser}=globalThis.__pageAuth;').replace("import {isStudioAdmin} from '@/lib/admin-access';",'const {isStudioAdmin}=globalThis.__pageAuth;');
+let pageActor,renderedStudio,pageBrandReads=0;
+globalThis.__pageAuth={requireUser:async next=>{if(!pageActor)throw new Error('LOGIN:'+next);return pageActor},isStudioAdmin,database:()=>({collection:()=>({doc:()=>({get:async()=>{pageBrandReads++;return {data:()=>({name:'Test studio'})}}})})}),AdminShell:props=>{renderedStudio=props;return React.createElement('main',null,'ADMIN SHELL')}};
+const pageSource=(await readFile(new URL('../app/admin/page.tsx',import.meta.url),'utf8')).replace("import AdminShell from './admin-shell';",'const {AdminShell}=globalThis.__pageAuth;').replace("import {database} from '@/lib/firebase-admin';",'const {database}=globalThis.__pageAuth;').replace("'@/lib/studio-settings'",JSON.stringify(new URL('../lib/studio-settings.ts',import.meta.url).href)).replace("import {requireUser} from '@/lib/firebase-session';",'const {requireUser}=globalThis.__pageAuth;').replace("import {isStudioAdmin} from '@/lib/admin-access';",'const {isStudioAdmin}=globalThis.__pageAuth;');
 const pageJs=ts.transpileModule('const React=globalThis.__qualityReact;\n'+pageSource,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.React}}).outputText;
 const adminPage=(await import('data:text/javascript;base64,'+Buffer.from(pageJs).toString('base64'))).default;
 test('direct admin page redirects signed-out users, refuses ordinary accounts and opens admin view only for exact owner',async()=>{
  const previous=process.env.ADMIN_UID;process.env.ADMIN_UID='owner';renderedStudio=null;pageActor=null;await assert.rejects(()=>adminPage(),/LOGIN:\/admin/);
- pageActor={userId:'customer',email:'customer@example.test',displayName:'Customer'};const denied=renderToStaticMarkup(await adminPage());assert.match(denied,/অ্যাডমিন অনুমতি প্রয়োজন/);assert.equal(renderedStudio,null);
- pageActor={userId:'owner',email:'owner@example.test',displayName:'Owner'};assert.match(renderToStaticMarkup(await adminPage()),/ADMIN STUDIO/);assert.equal(renderedStudio.initialView,'admin');assert.equal(renderedStudio.userEmail,'owner@example.test');if(previous===undefined)delete process.env.ADMIN_UID;else process.env.ADMIN_UID=previous;
+ pageActor={userId:'customer',email:'customer@example.test',displayName:'Customer'};const denied=renderToStaticMarkup(await adminPage());assert.match(denied,/অ্যাডমিন অনুমতি প্রয়োজন/);assert.equal(renderedStudio,null);assert.equal(pageBrandReads,0);
+ pageActor={userId:'owner',email:'owner@example.test',displayName:'Owner'};assert.match(renderToStaticMarkup(await adminPage()),/ADMIN SHELL/);assert.equal(renderedStudio.expectedUid,'owner');assert.equal(renderedStudio.initialBrand.name,'Test studio');assert.equal(pageBrandReads,1);if(previous===undefined)delete process.env.ADMIN_UID;else process.env.ADMIN_UID=previous;
 });

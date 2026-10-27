@@ -3,9 +3,13 @@ service firebase.storage {
   match /b/{bucket}/o {
     match /users/{uid}/{fileId} {
       function owner() { return request.auth != null && request.auth.uid == uid && request.auth.token.email_verified == true; }
+      function reservation() { return firestore.get(/databases/(default)/documents/uploadReservations/$(fileId)).data; }
       allow read: if owner();
-      // Create-only prevents a client overwriting an accepted/signed file.
-      allow create: if owner() && fileId.matches('^[a-zA-Z0-9-]{20,80}$') && request.resource.size > 0 && request.resource.size <= 20 * 1024 * 1024;
+      // A server reservation applies quota before bytes are uploaded. Accepted files are immutable.
+      allow create: if owner() && fileId.matches('^[a-zA-Z0-9-]{20,80}$')
+        && reservation().owner == uid && reservation().status == 'pending' && request.time < reservation().expiresAt
+        && request.resource.size > 0 && request.resource.size <= reservation().size
+        && request.resource.size <= 20 * 1024 * 1024;
       allow update, delete: if false;
     }
     match /{allPaths=**} { allow read, write: if false; }

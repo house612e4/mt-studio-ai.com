@@ -14,14 +14,9 @@ jobs:
           node-version: 22
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
       - run: pnpm typecheck
-      - run: pnpm test:security
-      - run: pnpm test:design
-      - run: pnpm test:repair
-      - run: pnpm test:admin
-      - run: pnpm test:site
-      - run: pnpm test:quality
-      - run: pnpm test:commerce
+      - run: pnpm test
       - run: node --no-experimental-require-module -e "require('firebase-admin/auth')"
       - run: pnpm build
         env:

@@ -17,6 +17,8 @@ export const menuGroups=[
 const iconMap:Record<string,typeof FileText>={dashboard:LayoutGrid,files:FileText,contest:Trophy,'ai-document':Sparkles,tools:LayoutGrid,transaction:Coins,debt:ArrowLeftRight,invoice:Receipt,customer:Users,'transaction-add':Plus,'transaction-list':Receipt,'photo-settings':Sparkles,settings:Settings,shop:Store,whatsapp:MessageCircle,'support-group':Users};
 export default function AccountMenu({open,onOpenChange,data,name,view,go,credits,info,guest=false}:{open:boolean;onOpenChange:(v:boolean)=>void;data:Workspace;name:string;view:string;go:(v:string)=>void;credits:()=>void;info:(v:string)=>void;guest?:boolean}){
  const [english,setEnglish]=useState(false),[dark,setDark]=useState(false),[showProgress,setShowProgress]=useState(true);
+// Browser preferences are read after hydration so server and initial client markup match.
+// eslint-disable-next-line react-hooks/set-state-in-effect
  useEffect(()=>{try{setEnglish(localStorage.getItem('mt-menu-language')==='en');const d=localStorage.getItem('mt-theme')==='dark';setDark(d);document.documentElement.dataset.studioTheme=d?'dark':'light'}catch{}},[]);
  useEffect(()=>{const changed=(e:Event)=>setDark((e as CustomEvent<boolean>).detail);window.addEventListener('mt-theme-change',changed);return()=>window.removeEventListener('mt-theme-change',changed)},[]);
  const changeLanguage=(value:boolean)=>{setEnglish(value);try{localStorage.setItem('mt-menu-language',value?'en':'bn')}catch{}};

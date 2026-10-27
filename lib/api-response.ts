@@ -1,5 +1,7 @@
 export async function readApiJson(response: Response) {
  const text = await response.text();
+ // API payloads vary by endpoint; callers validate or narrow the response fields.
+ // eslint-disable-next-line @typescript-eslint/no-explicit-any
  let data: Record<string, any>;
  try { data = JSON.parse(text); } catch {
   throw new Error(response.status === 401 ? 'সেশন শেষ হয়েছে। আবার লগইন করুন।' : `সার্ভার থেকে সঠিক উত্তর পাওয়া যায়নি (HTTP ${response.status})। আবার চেষ্টা করুন; সমস্যা থাকলে এই নম্বরটি সহায়তাকারীকে জানান।`);

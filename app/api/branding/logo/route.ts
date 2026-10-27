@@ -1,8 +1,8 @@
 import sharp from 'sharp';
-import {account,database,bucket,checkWriteRequest,failure,HttpError} from '@/lib/server';
+import {account,database,bucket,checkWriteRequest,failure,HttpError,requireRecentAdmin,enforceRateLimit} from '@/lib/server';
 import {appOrigin} from '@/lib/app-origin';
 export const runtime='nodejs';export const dynamic='force-dynamic';
-export async function POST(req:Request){try{checkWriteRequest(req);const user=await account();if(!user.admin)throw new HttpError(403,'অ্যাডমিন অনুমতি প্রয়োজন।');const form=await req.formData(),file=form.get('logo');if(!(file instanceof File)||file.size<1||file.size>2*1024*1024||!['image/png','image/jpeg','image/webp'].includes(file.type))throw new HttpError(400,'সর্বোচ্চ ২ MB-এর PNG, JPG বা WebP লোগো দিন।');
+export async function POST(req:Request){try{checkWriteRequest(req);const user=await account();requireRecentAdmin(user);await enforceRateLimit('admin-logo:'+user.userId,5,60_000);const form=await req.formData(),file=form.get('logo');if(!(file instanceof File)||file.size<1||file.size>2*1024*1024||!['image/png','image/jpeg','image/webp'].includes(file.type))throw new HttpError(400,'সর্বোচ্চ ২ MB-এর PNG, JPG বা WebP লোগো দিন।');
  let png:Buffer;try{png=await sharp(Buffer.from(await file.arrayBuffer()),{limitInputPixels:10000000}).rotate().resize({width:1024,height:1024,fit:'inside',withoutEnlargement:true}).png().toBuffer()}catch{throw new HttpError(400,'লোগোর ছবিটি পড়া যায়নি।')}
  if(png.length>2*1024*1024)throw new HttpError(400,'লোগোর মাপ বা মান কমিয়ে দিন।');const id=crypto.randomUUID(),path='public/logo/'+id+'.png',logoUrl=appOrigin()+'/api/branding/logo?v='+id;await bucket().file(path).save(png,{resumable:false,metadata:{contentType:'image/png',cacheControl:'public,max-age=3600'}});const db=database(),batch=db.batch();batch.set(db.collection('settings').doc('publicLogo'),{path,updatedBy:user.userId});batch.set(db.collection('settings').doc('brand'),{logoUrl},{merge:true});await batch.commit();return Response.json({logoUrl})
  }catch(e){return failure(e)}}
