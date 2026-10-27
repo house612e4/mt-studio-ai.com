@@ -1,6 +1,7 @@
 'use client';
 import {useEffect,useState} from 'react';
 import AdminContent from './admin-content';
+import ManualPaymentAdmin from './manual-payment-admin';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Textarea} from '@/components/ui/textarea';
@@ -46,6 +47,8 @@ export default function AdminWorkspace({data,refresh,contest}:{data:Workspace;re
  <div className="two-columns"><section className="panel"><h2>স্টুডিও ও সাপোর্ট</h2><p>ঐচ্ছিক লিংক খালি থাকলে সংশ্লিষ্ট বাটন দেখানো হবে না। API key এই ফর্মে দেবেন না।</p><form onSubmit={async e=>{e.preventDefault();setSaving(true);setBrandMessage('');try{await write('brand',{data:brand});setBrandMessage('তথ্য সংরক্ষিত হয়েছে।');await refresh()}catch(e){setBrandMessage((e as Error).message)}finally{setSaving(false)}}}>{fields.map(f=><label key={f.key}>{f.label}<Input type={f.type||'text'} value={brand[f.key]} maxLength={f.max} required={f.key==='name'} disabled={saving} onChange={e=>setBrand({...brand,[f.key]:e.target.value})}/></label>)}<Button disabled={saving} type="submit">{saving?'সংরক্ষণ হচ্ছে…':'তথ্য সংরক্ষণ'}</Button><p role="status">{brandMessage}</p></form></section>
  <section className="panel"><h2>গ্রাহকের ক্রেডিট সমন্বয়</h2><p>এটি অ্যাডমিন সমন্বয়। পেমেন্ট গ্রহণ হয়েছে বলে চিহ্নিত করবে না।</p><form onSubmit={e=>{e.preventDefault();void find()}}><label>গ্রাহকের যাচাইকৃত ইমেইল<Input type="email" required maxLength={254} value={email} disabled={busy} onChange={e=>{setEmail(e.target.value);setCustomer(null);setAttempt(null)}}/></label><Button disabled={busy} type="submit">গ্রাহক খুঁজুন</Button></form>{customer&&<><div className="admin-customer"><strong>{customer.name||customer.email}</strong><span>{customer.email}</span><small>UID: {customer.userId}</small><p>বর্তমান ক্রেডিট: <b>{customer.credits}</b></p></div><label>সমন্বয়ের পর মোট ক্রেডিট<Input type="number" min="0" max="100000" step="1" disabled={busy||!!attempt} value={balance} onChange={e=>setBalance(e.target.value)}/></label><label>সমন্বয়ের কারণ<Textarea maxLength={300} rows={3} disabled={busy||!!attempt} value={reason} onChange={e=>setReason(e.target.value)}/></label>{canAdjust&&<p>পরিবর্তন: {customer.credits} → {Number(balance)} ক্রেডিট</p>}<Button disabled={busy||!attempt&&!canAdjust} onClick={()=>void adjust()}>{busy?'কাজ হচ্ছে…':attempt?'একই অনুরোধের ফল যাচাই করুন':'ক্রেডিট সমন্বয় করুন'}</Button></>}<p role="status">{message}</p></section></div>
  <section className="panel"><h2>সাম্প্রতিক সমন্বয়</h2>{diagnostic?.audit.length?diagnostic.audit.map(a=><div className="admin-check" key={a.id}><div><strong>{a.email}</strong><small>{a.reason} · {new Date(a.created).toLocaleString('bn-BD')}</small></div><b>{a.before} → {a.after}</b></div>):<p>এখনও সমন্বয়ের তথ্য নেই।</p>}</section>
+ <section className="panel"><h2>প্রতিযোগিতা পরিচালনা</h2><p>কাজ, পয়েন্ট, সময় ও পুরস্কার নির্ধারণ করুন। প্রকৃত অংশগ্রহণ থেকে লিডারবোর্ড তৈরি হবে।</p><div className="button-row"><a className="primary-link" href="/contest">পয়েন্ট প্রতিযোগিতা পরিচালনা</a><Button variant="outline" onClick={contest}>ছবি জমার প্রতিযোগিতা পরিচালনা</Button></div></section>
+ <ManualPaymentAdmin refresh={refresh}/>
  <AdminContent refresh={refresh} contest={contest}/>
  </div>
 }

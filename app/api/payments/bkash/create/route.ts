@@ -6,7 +6,7 @@ import {paymentOrigin,hash} from '@/lib/payment-service';
 import {publicBrand} from '@/lib/studio-settings';
 export const runtime='nodejs';export const maxDuration=60;
 export async function POST(req:Request){try{
- checkWriteRequest(req);const user=await account(),c=bkashConfig();if(!c||c.environment==='sandbox'&&!user.admin)throw new HttpError(503,'bKash পেমেন্ট এখনও চালু হয়নি।');
+ checkWriteRequest(req);if(process.env.PAYMENT_MODE!=='automatic')throw new HttpError(503,'এখন ম্যানুয়াল পেমেন্ট চালু আছে। পেমেন্টের তথ্য জমা দিন।');const user=await account(),c=bkashConfig();if(!c||c.environment==='sandbox'&&!user.admin)throw new HttpError(503,'bKash পেমেন্ট এখনও চালু হয়নি।');
  const body=await req.json(),p=creditPackage(body.packageId);if(!p||!uuid(body.requestId)||body.accepted!==true)throw new HttpError(400,'প্যাকেজ ও নীতিমালায় সম্মতি প্রয়োজন।');
  const db=database(),brand=publicBrand((await db.collection('settings').doc('brand').get()).data());if(!brand.termsUrl||!brand.privacyUrl||!brand.refundUrl)throw new HttpError(503,'স্টুডিওর ব্যবহারের শর্ত, গোপনীয়তা ও রিফান্ড নীতি প্রকাশ করা বাকি।');
  const id=body.requestId,ref=db.collection('paymentOrders').doc(id),nonce=crypto.randomUUID().replace(/-/g,'')+crypto.randomUUID().replace(/-/g,''),invoice='MT-'+id,origin=paymentOrigin();

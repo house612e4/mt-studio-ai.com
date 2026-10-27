@@ -16,7 +16,8 @@
     "test:admin": "node --experimental-strip-types --test tests/admin.test.mjs",
     "test:payment": "node --experimental-strip-types --test tests/payment.test.mjs",
     "test:site": "node --experimental-strip-types --test tests/site.test.mjs",
-    "test:quality": "node --experimental-strip-types --test tests/quality.test.mjs"
+    "test:quality": "node --experimental-strip-types --test tests/quality.test.mjs",
+    "test:commerce": "node --experimental-strip-types --test tests/commerce.test.mjs tests/manual-payment.test.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
