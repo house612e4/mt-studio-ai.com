@@ -9,4 +9,3 @@ export const creditPackages=[
  {id:'business',name:'বিজনেস',priceBDT:1999,totalCredits:2200,bonusCredits:201}
 ] as const;
 export function creditPackage(id:unknown){return typeof id==='string'?creditPackages.find(p=>p.id===id):undefined}
-export const merchantBkash='01311128584';

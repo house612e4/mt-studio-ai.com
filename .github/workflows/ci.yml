@@ -19,7 +19,6 @@ jobs:
       - run: pnpm test:design
       - run: pnpm test:repair
       - run: pnpm test:admin
-      - run: pnpm test:payment
       - run: pnpm test:site
       - run: pnpm test:quality
       - run: pnpm test:commerce

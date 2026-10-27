@@ -35,7 +35,7 @@ globalThis.__mtAdminTest={
  adminAuth:()=>({getUser:async uid=>{authLookups++;return {uid,email:'customer@example.com',disabled:false,emailVerified:true}}})
 };
 const source=await readFile(new URL('../app/api/admin/route.ts',import.meta.url),'utf8');
-const imports=source.replace("import {bkashConfig} from '@/lib/bkash';",'const bkashConfig=()=>null;').replace(/import \{([^}]+)\} from '@\/lib\/server';/, 'const {$1}=globalThis.__mtAdminTest;').replace(/import \{adminAuth\} from '@\/lib\/firebase-admin';/, 'const {adminAuth}=globalThis.__mtAdminTest;').replace("'@/lib/admin-input'",JSON.stringify(new URL('../lib/admin-input.ts',import.meta.url).href));
+const imports=source.replace(/import \{([^}]+)\} from '@\/lib\/server';/, 'const {$1}=globalThis.__mtAdminTest;').replace(/import \{adminAuth\} from '@\/lib\/firebase-admin';/, 'const {adminAuth}=globalThis.__mtAdminTest;').replace("'@/lib/admin-input'",JSON.stringify(new URL('../lib/admin-input.ts',import.meta.url).href));
 const js=ts.transpileModule(imports,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
 const route=await import('data:text/javascript;base64,'+Buffer.from(js).toString('base64'));
 function reset(){actor={admin:true,userId:'owner'};records=new Map([['users/customer-123',{credits:10}]]);authLookups=0}
