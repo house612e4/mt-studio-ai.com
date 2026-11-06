@@ -57,9 +57,9 @@ test('stale balance and reused id with different payload cannot overwrite or dup
  reset();await route.POST(request());assert.equal((await route.POST(request({...valid,credits:999}))).status,409);assert.equal(records.get('users/customer-123').credits,25);assert.equal(records.size,3);
 });
 
-test('studio contact defaults preserve separate Bangladesh phone and US WhatsApp',()=>{
+test('studio contact defaults use one number for phone and WhatsApp',()=>{
  const b=publicBrand({name:'MT studio',phone:'',welcome:'Welcome'});
- assert.equal(b.phone,'01311128584');assert.equal(b.whatsappPhone,'+19174199814');assert.equal(b.supportEmail,'studiomt46@gmail.com');assert.equal(b.address,'Noakhali, Bangladesh');
+ assert.equal(b.phone,'+13479088018');assert.equal(b.whatsappPhone,'+13479088018');assert.equal(b.supportEmail,'studiomt46@gmail.com');assert.equal(b.address,'Noakhali, Bangladesh');
  assert.equal(validateBrand({...b,whatsappPhone:'01311128584'}),null);
  assert.equal(validateBrand({...b,address:'x'.repeat(301)}),null);
  assert.equal(publicBrand({...b,whatsappPhone:''}).whatsappPhone,'');
